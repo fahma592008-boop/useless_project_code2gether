@@ -1,1 +1,1770 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
 
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Random Excuse Roulette – Make Any Excuse</title>
+  <meta name="description"
+    content="Just type what happened and get a totally random, funny excuse. Works every time. Probably." />
+  <meta property="og:title" content="Random Excuse Roulette" />
+  <meta property="og:description" content="Type your situation. Get a weird excuse. It's that simple." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&family=Syne:wght@700;800&display=swap"
+    rel="stylesheet" />
+  <style>
+    /* =============================================
+       DESIGN TOKENS
+    ============================================= */
+    :root {
+      --bg: #090a12;
+      --bg2: #111220;
+      --bg3: #181929;
+      --card: #1c1d2e;
+      --glass: rgba(18, 19, 32, 0.75);
+      --inp: #1e2033;
+      --bdr: rgba(255, 255, 255, 0.07);
+      --bdr-focus: rgba(139, 92, 246, 0.55);
+      --p1: #8b5cf6;
+      --p2: #ec4899;
+      --p3: #06b6d4;
+      --glow: rgba(139, 92, 246, 0.3);
+      --tx: #eeeef8;
+      --tx2: #9ca3b8;
+      --tx3: #6b7280;
+      --grad: linear-gradient(135deg, #8b5cf6, #ec4899);
+      --gradb: linear-gradient(135deg, #8b5cf6 0%, #a855f7 50%, #ec4899 100%);
+      --gradc: linear-gradient(135deg, rgba(139, 92, 246, .13), rgba(236, 72, 153, .08));
+      --sh1: 0 2px 8px rgba(0, 0, 0, .35);
+      --sh2: 0 8px 32px rgba(0, 0, 0, .45);
+      --sh3: 0 20px 64px rgba(0, 0, 0, .55);
+      --shg: 0 0 48px rgba(139, 92, 246, .25);
+      --r1: 6px;
+      --r2: 12px;
+      --r3: 18px;
+      --r4: 24px;
+      --r5: 32px;
+      --ease: cubic-bezier(.4, 0, .2, 1);
+      --bounce: cubic-bezier(.34, 1.56, .64, 1);
+      --fb: 'Inter', system-ui, sans-serif;
+      --fd: 'Syne', 'Inter', sans-serif;
+    }
+
+    [data-theme="light"] {
+      --bg: #f4f4ff;
+      --bg2: #eceeff;
+      --bg3: #e6e7ff;
+      --card: #ffffff;
+      --glass: rgba(255, 255, 255, .78);
+      --inp: #f0f0ff;
+      --bdr: rgba(0, 0, 0, .09);
+      --bdr-focus: rgba(139, 92, 246, .45);
+      --glow: rgba(139, 92, 246, .18);
+      --tx: #0c0d1a;
+      --tx2: #4a4a6a;
+      --tx3: #9090b0;
+      --gradc: linear-gradient(135deg, rgba(139, 92, 246, .07), rgba(236, 72, 153, .04));
+      --sh1: 0 2px 8px rgba(0, 0, 0, .07);
+      --sh2: 0 8px 32px rgba(0, 0, 0, .1);
+      --sh3: 0 20px 64px rgba(0, 0, 0, .13);
+      --shg: 0 0 48px rgba(139, 92, 246, .12);
+    }
+
+    /* =============================================
+       RESET
+    ============================================= */
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      font-size: 16px;
+    }
+
+    body {
+      font-family: var(--fb);
+      background: var(--bg);
+      color: var(--tx);
+      min-height: 100vh;
+      overflow-x: hidden;
+      line-height: 1.65;
+      transition: background .3s var(--ease), color .3s var(--ease);
+    }
+
+    /* =============================================
+       AMBIENT BACKGROUND
+    ============================================= */
+    .scene {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(100px);
+      opacity: .16;
+      animation: drift 14s ease-in-out infinite alternate;
+    }
+
+    [data-theme="light"] .blob {
+      opacity: .08;
+    }
+
+    .b1 {
+      width: 560px;
+      height: 560px;
+      background: #8b5cf6;
+      top: -180px;
+      left: -120px;
+    }
+
+    .b2 {
+      width: 440px;
+      height: 440px;
+      background: #ec4899;
+      bottom: 5%;
+      right: -120px;
+      animation-delay: -5s;
+    }
+
+    .b3 {
+      width: 340px;
+      height: 340px;
+      background: #06b6d4;
+      top: 45%;
+      left: 38%;
+      animation-delay: -9s;
+    }
+
+    @keyframes drift {
+      from {
+        transform: translate(0, 0) scale(1);
+      }
+
+      to {
+        transform: translate(40px, 28px) scale(1.06);
+      }
+    }
+
+    /* =============================================
+       WRAPPER
+    ============================================= */
+    .wrap {
+      position: relative;
+      z-index: 1;
+    }
+
+    /* =============================================
+       HEADER
+    ============================================= */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 200;
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+      background: var(--glass);
+      border-bottom: 1px solid var(--bdr);
+      transition: background .3s, border-color .3s;
+    }
+
+    .nav {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 0 24px;
+      height: 66px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    /* Logo */
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      font-family: var(--fd);
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: var(--tx);
+      transition: opacity .2s;
+      flex-shrink: 0;
+    }
+
+    .logo:hover {
+      opacity: .8;
+    }
+
+    .logo-dice {
+      font-size: 1.35rem;
+      display: inline-block;
+      animation: diceSpin 5s ease-in-out infinite;
+    }
+
+    @keyframes diceSpin {
+
+      0%,
+      78%,
+      100% {
+        transform: rotate(0)
+      }
+
+      82% {
+        transform: rotate(-22deg)
+      }
+
+      88% {
+        transform: rotate(22deg)
+      }
+
+      94% {
+        transform: rotate(-11deg)
+      }
+    }
+
+    .logo-name {
+      background: var(--grad);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* Nav links */
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .nl {
+      padding: 7px 15px;
+      border-radius: var(--r1);
+      font-size: .875rem;
+      font-weight: 500;
+      color: var(--tx2);
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      font-family: var(--fb);
+      transition: color .2s, background .2s;
+    }
+
+    .nl:hover {
+      color: var(--tx);
+      background: var(--bdr);
+    }
+
+    .nl.on {
+      color: var(--p1);
+    }
+
+    /* Actions */
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .icon-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--r1);
+      border: 1px solid var(--bdr);
+      background: var(--card);
+      color: var(--tx2);
+      cursor: pointer;
+      font-size: 1.05rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all .2s;
+    }
+
+    .icon-btn:hover {
+      color: var(--tx);
+      border-color: var(--p1);
+      box-shadow: 0 0 14px var(--glow);
+      transform: scale(1.06);
+    }
+
+    /* =============================================
+       LAYOUT
+    ============================================= */
+    .ctr {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    .ctr-wide {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* =============================================
+       HERO
+    ============================================= */
+    .hero {
+      padding: 76px 0 56px;
+      text-align: center;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--gradc);
+      border: 1px solid rgba(139, 92, 246, .28);
+      border-radius: 999px;
+      padding: 5px 16px;
+      font-size: .75rem;
+      font-weight: 700;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+      color: var(--p1);
+      margin-bottom: 26px;
+      animation: slideD .55s ease both;
+    }
+
+    .badge-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--p1);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1;
+        transform: scale(1)
+      }
+
+      50% {
+        opacity: .45;
+        transform: scale(.7)
+      }
+    }
+
+    .hero h1 {
+      font-family: var(--fd);
+      font-size: clamp(2.6rem, 7vw, 4.8rem);
+      font-weight: 800;
+      line-height: 1.08;
+      letter-spacing: -.025em;
+      margin-bottom: 18px;
+      animation: slideD .55s .08s ease both;
+    }
+
+    .hl {
+      background: var(--grad);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-sub {
+      font-size: clamp(.95rem, 2.2vw, 1.15rem);
+      color: var(--tx2);
+      max-width: 500px;
+      margin: 0 auto 44px;
+      animation: slideD .55s .16s ease both;
+    }
+
+    @keyframes slideD {
+      from {
+        opacity: 0;
+        transform: translateY(-18px)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0)
+      }
+    }
+
+    @keyframes slideU {
+      from {
+        opacity: 0;
+        transform: translateY(22px)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0)
+      }
+    }
+
+    @keyframes scIn {
+      from {
+        opacity: 0;
+        transform: scale(.88)
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1)
+      }
+    }
+
+    @keyframes fadeI {
+      from {
+        opacity: 0
+      }
+
+      to {
+        opacity: 1
+      }
+    }
+
+    /* =============================================
+       INPUT SECTION
+    ============================================= */
+    .inp-section {
+      animation: slideD .55s .24s ease both;
+    }
+
+    .inp-wrap {
+      position: relative;
+      margin-bottom: 14px;
+    }
+
+    .sitch {
+      width: 100%;
+      min-height: 116px;
+      padding: 18px 22px 40px;
+      border-radius: var(--r3);
+      border: 1.5px solid var(--bdr);
+      background: var(--inp);
+      color: var(--tx);
+      font-family: var(--fb);
+      font-size: 1rem;
+      line-height: 1.6;
+      resize: vertical;
+      outline: none;
+      transition: border-color .2s, box-shadow .2s, background .3s;
+    }
+
+    .sitch::placeholder {
+      color: var(--tx3);
+    }
+
+    .sitch:focus {
+      border-color: var(--bdr-focus);
+      box-shadow: 0 0 0 4px var(--glow);
+    }
+
+    .char-cnt {
+      position: absolute;
+      bottom: 12px;
+      right: 16px;
+      font-size: .7rem;
+      color: var(--tx3);
+      pointer-events: none;
+    }
+
+    /* Error */
+    .err {
+      display: none;
+      align-items: center;
+      gap: 10px;
+      background: rgba(239, 68, 68, .1);
+      border: 1px solid rgba(239, 68, 68, .28);
+      border-radius: var(--r2);
+      padding: 13px 18px;
+      font-size: .88rem;
+      color: #f87171;
+      margin-bottom: 14px;
+      animation: slideU .3s ease both;
+    }
+
+    .err.on {
+      display: flex;
+    }
+
+    /* Top-row buttons */
+    .top-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+
+    .btn-gen {
+      flex: 1;
+      min-width: 200px;
+      padding: 17px 28px;
+      border-radius: var(--r3);
+      border: none;
+      background: var(--gradb);
+      color: #fff;
+      font-family: var(--fb);
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: transform .35s var(--bounce), box-shadow .25s var(--ease);
+      box-shadow: 0 4px 22px rgba(139, 92, 246, .42);
+    }
+
+    .btn-gen::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255, 255, 255, .14) 0%, transparent 55%);
+      pointer-events: none;
+    }
+
+    .btn-gen:hover:not(:disabled) {
+      transform: translateY(-2px) scale(1.015);
+      box-shadow: 0 8px 32px rgba(139, 92, 246, .58);
+    }
+
+    .btn-gen:active:not(:disabled) {
+      transform: translateY(0) scale(.99);
+    }
+
+    .btn-gen:disabled {
+      opacity: .68;
+      cursor: not-allowed;
+    }
+
+    .btn-gen.loading .bt {
+      display: none;
+    }
+
+    .btn-gen:not(.loading) .bld {
+      display: none;
+    }
+
+    .bld {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .spin {
+      width: 17px;
+      height: 17px;
+      border-radius: 50%;
+      border: 2px solid rgba(255, 255, 255, .3);
+      border-top-color: #fff;
+      animation: sp .55s linear infinite;
+    }
+
+    @keyframes sp {
+      to {
+        transform: rotate(360deg)
+      }
+    }
+
+    /* Surprise Me */
+    .btn-surprise {
+      padding: 17px 22px;
+      border-radius: var(--r3);
+      border: 1.5px solid rgba(6, 182, 212, .35);
+      background: rgba(6, 182, 212, .08);
+      color: #22d3ee;
+      font-family: var(--fb);
+      font-size: .95rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all .25s var(--ease);
+    }
+
+    .btn-surprise:hover {
+      background: rgba(6, 182, 212, .16);
+      border-color: rgba(6, 182, 212, .6);
+      box-shadow: 0 0 20px rgba(6, 182, 212, .25);
+      transform: translateY(-1px);
+    }
+
+    .btn-surprise:active {
+      transform: translateY(0);
+    }
+
+    /* =============================================
+       RESULT SECTION
+    ============================================= */
+    .result {
+      margin-top: 36px;
+      display: none;
+    }
+
+    .result.on {
+      display: block;
+      animation: scIn .42s var(--bounce) both;
+    }
+
+    .rcard {
+      background: var(--card);
+      border: 1px solid rgba(139, 92, 246, .22);
+      border-radius: var(--r5);
+      padding: 38px 34px 30px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: var(--sh3), var(--shg);
+      transition: background .3s, border-color .3s;
+    }
+
+    .rcard::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--grad);
+    }
+
+    .rcard-label {
+      font-size: .68rem;
+      font-weight: 700;
+      letter-spacing: .13em;
+      text-transform: uppercase;
+      color: var(--p1);
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .rcard-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--bdr);
+    }
+
+    .rcard-quote {
+      font-family: var(--fd);
+      font-size: clamp(1.25rem, 3.2vw, 1.75rem);
+      font-weight: 700;
+      line-height: 1.42;
+      color: var(--tx);
+      margin-bottom: 24px;
+      position: relative;
+    }
+
+    .rcard-quote::before {
+      content: '"';
+      font-family: Georgia, serif;
+      font-size: 4.5rem;
+      line-height: 0;
+      color: rgba(139, 92, 246, .14);
+      position: absolute;
+      top: 26px;
+      left: -6px;
+      pointer-events: none;
+    }
+
+    .rcard-text {
+      position: relative;
+      padding-left: 6px;
+    }
+
+    /* Credibility badge */
+    .cred {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 5px 13px;
+      border-radius: 999px;
+      font-size: .8rem;
+      font-weight: 600;
+      margin-bottom: 22px;
+      border: 1px solid;
+    }
+
+    .c0 {
+      background: rgba(74, 222, 128, .09);
+      border-color: rgba(74, 222, 128, .28);
+      color: #4ade80
+    }
+
+    .c1 {
+      background: rgba(250, 204, 21, .09);
+      border-color: rgba(250, 204, 21, .28);
+      color: #facc15
+    }
+
+    .c2 {
+      background: rgba(251, 146, 60, .09);
+      border-color: rgba(251, 146, 60, .28);
+      color: #fb923c
+    }
+
+    .c3 {
+      background: rgba(248, 113, 113, .09);
+      border-color: rgba(248, 113, 113, .28);
+      color: #f87171
+    }
+
+    .c4 {
+      background: rgba(192, 38, 211, .09);
+      border-color: rgba(192, 38, 211, .28);
+      color: #e879f9
+    }
+
+    /* Result action buttons */
+    .ract {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 11px 20px;
+      border-radius: var(--r2);
+      font-family: var(--fb);
+      font-size: .875rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .22s var(--ease);
+      border: 1.5px solid transparent;
+      outline: none;
+    }
+
+    .btn:focus-visible {
+      outline: 2px solid var(--p1);
+      outline-offset: 2px;
+    }
+
+    .btn-p {
+      background: var(--gradb);
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(139, 92, 246, .35);
+    }
+
+    .btn-p:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 22px rgba(139, 92, 246, .52);
+    }
+
+    .btn-p:active {
+      transform: translateY(0);
+    }
+
+    .btn-s {
+      background: var(--inp);
+      color: var(--tx2);
+      border-color: var(--bdr);
+    }
+
+    .btn-s:hover {
+      color: var(--tx);
+      border-color: rgba(139, 92, 246, .38);
+      background: var(--card);
+    }
+
+    .btn-cp.ok {
+      background: rgba(74, 222, 128, .13);
+      border-color: rgba(74, 222, 128, .38);
+      color: #4ade80;
+    }
+
+    .btn-ca.ok {
+      background: rgba(74, 222, 128, .13);
+      border-color: rgba(74, 222, 128, .38);
+      color: #4ade80;
+    }
+
+    /* =============================================
+       STATS
+    ============================================= */
+    .sec {
+      margin-top: 56px;
+    }
+
+    .sec-title {
+      font-family: var(--fd);
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: var(--tx);
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+
+    .sgrid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 14px;
+    }
+
+    .scard {
+      background: var(--card);
+      border: 1px solid var(--bdr);
+      border-radius: var(--r3);
+      padding: 22px 18px;
+      text-align: center;
+      transition: all .22s var(--ease);
+    }
+
+    .scard:hover {
+      border-color: rgba(139, 92, 246, .28);
+      transform: translateY(-2px);
+      box-shadow: var(--sh2);
+    }
+
+    .sv {
+      font-family: var(--fd);
+      font-size: 2.1rem;
+      font-weight: 800;
+      background: var(--grad);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1.2;
+      margin-bottom: 5px;
+    }
+
+    .sv.bump {
+      animation: bmp .38s var(--bounce);
+    }
+
+    @keyframes bmp {
+      0% {
+        transform: scale(1)
+      }
+
+      50% {
+        transform: scale(1.28)
+      }
+
+      100% {
+        transform: scale(1)
+      }
+    }
+
+    .sl {
+      font-size: .76rem;
+      font-weight: 500;
+      color: var(--tx3);
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+
+    /* =============================================
+       HISTORY
+    ============================================= */
+    .hist-hdr {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .btn-clr {
+      background: transparent;
+      border: 1.5px solid var(--bdr);
+      color: var(--tx3);
+      padding: 7px 14px;
+      border-radius: var(--r1);
+      font-family: var(--fb);
+      font-size: .8rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all .2s;
+    }
+
+    .btn-clr:hover {
+      border-color: rgba(239, 68, 68, .38);
+      color: #f87171;
+    }
+
+    .hist-empty {
+      background: var(--card);
+      border: 1px dashed var(--bdr);
+      border-radius: var(--r3);
+      padding: 38px 24px;
+      text-align: center;
+      color: var(--tx3);
+      font-size: .88rem;
+    }
+
+    .he-ico {
+      font-size: 2.2rem;
+      margin-bottom: 10px;
+    }
+
+    .hlist {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+    }
+
+    .hitem {
+      background: var(--card);
+      border: 1px solid var(--bdr);
+      border-radius: var(--r2);
+      padding: 14px 18px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      transition: all .2s var(--ease);
+      animation: slideU .32s ease both;
+    }
+
+    .hitem:hover {
+      border-color: rgba(139, 92, 246, .22);
+      transform: translateX(4px);
+    }
+
+    .hn {
+      font-size: .7rem;
+      font-weight: 700;
+      color: var(--p1);
+      background: rgba(139, 92, 246, .11);
+      border-radius: 4px;
+      padding: 3px 7px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .ht {
+      flex: 1;
+      font-size: .9rem;
+      color: var(--tx2);
+      line-height: 1.5;
+    }
+
+    .btn-cpsm {
+      background: transparent;
+      border: 1px solid var(--bdr);
+      color: var(--tx3);
+      padding: 5px 9px;
+      border-radius: var(--r1);
+      font-size: .78rem;
+      cursor: pointer;
+      transition: all .2s;
+      font-family: var(--fb);
+      flex-shrink: 0;
+    }
+
+    .btn-cpsm:hover {
+      color: var(--tx);
+      border-color: rgba(139, 92, 246, .28);
+    }
+
+    .btn-cpsm.ok {
+      color: #4ade80;
+      border-color: rgba(74, 222, 128, .28);
+    }
+
+    /* Copy All bar */
+    .copy-all-bar {
+      display: none;
+      align-items: center;
+      justify-content: flex-end;
+      margin-top: 12px;
+    }
+
+    .copy-all-bar.on {
+      display: flex;
+    }
+
+    /* =============================================
+       ABOUT
+    ============================================= */
+    #about {
+      margin-top: 80px;
+      padding-top: 52px;
+      border-top: 1px solid var(--bdr);
+    }
+
+    .acard {
+      background: var(--gradc);
+      border: 1px solid rgba(139, 92, 246, .18);
+      border-radius: var(--r5);
+      padding: 46px 38px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .acard::after {
+      content: '🎲';
+      position: absolute;
+      bottom: -18px;
+      right: 18px;
+      font-size: 7.5rem;
+      opacity: .055;
+      pointer-events: none;
+      line-height: 1;
+    }
+
+    .acard h2 {
+      font-family: var(--fd);
+      font-size: 1.75rem;
+      font-weight: 800;
+      margin-bottom: 14px;
+    }
+
+    .acard p {
+      color: var(--tx2);
+      font-size: .97rem;
+      line-height: 1.78;
+      margin-bottom: 14px;
+      max-width: 620px;
+    }
+
+    .aquote {
+      background: var(--card);
+      border-left: 3px solid var(--p1);
+      border-radius: 0 var(--r1) var(--r1) 0;
+      padding: 14px 18px;
+      font-style: italic;
+      color: var(--tx2);
+      margin-top: 22px;
+      font-size: .93rem;
+    }
+
+    /* =============================================
+       FOOTER
+    ============================================= */
+    footer {
+      margin-top: 80px;
+      padding: 30px 24px;
+      text-align: center;
+      border-top: 1px solid var(--bdr);
+      color: var(--tx3);
+      font-size: .82rem;
+    }
+
+    /* =============================================
+       SCROLLBAR
+    ============================================= */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--bg);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--bdr);
+      border-radius: 999px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--p1);
+    }
+
+    /* =============================================
+       RESPONSIVE
+    ============================================= */
+    @media(max-width:640px) {
+      .nav {
+        padding: 0 16px;
+      }
+
+      .logo-name {
+        display: none;
+      }
+
+      .ctr {
+        padding: 0 16px;
+      }
+
+      .hero {
+        padding: 50px 0 38px;
+      }
+
+      .rcard {
+        padding: 26px 18px 22px;
+      }
+
+      .acard {
+        padding: 30px 22px;
+      }
+
+      .ract {
+        flex-direction: column;
+      }
+
+      .ract .btn {
+        justify-content: center;
+      }
+
+      .top-row {
+        flex-direction: column;
+      }
+
+      .btn-surprise {
+        text-align: center;
+      }
+
+      .sgrid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media(prefers-reduced-motion:reduce) {
+
+      *,
+      *::before,
+      *::after {
+        animation-duration: .01ms !important;
+        transition-duration: .01ms !important;
+      }
+    }
+
+    .sr {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+    }
+  </style>
+</head>
+
+<body>
+  <!-- ambient -->
+  <div class="scene" aria-hidden="true">
+    <div class="blob b1"></div>
+    <div class="blob b2"></div>
+    <div class="blob b3"></div>
+  </div>
+
+  <div class="wrap">
+    <!-- ====== HEADER ====== -->
+    <header role="banner">
+      <div class="nav">
+        <a href="#" class="logo" aria-label="Random Excuse Roulette — home">
+          <span class="logo-dice" aria-hidden="true">🎲</span>
+          <span class="logo-name">RANDOM EXCUSE ROULETTE</span>
+        </a>
+        <nav class="nav-links" role="navigation" aria-label="Main navigation">
+          <button class="nl on" id="nl-home" onclick="goHome()" aria-current="page">Home</button>
+          <button class="nl" id="nl-about" onclick="goAbout()">About</button>
+        </nav>
+        <div class="nav-right">
+          <button class="icon-btn" id="theme-btn" onclick="toggleTheme()" aria-label="Toggle light/dark mode"
+            title="Toggle theme">
+            <span id="theme-ico">☀️</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- ====== MAIN ====== -->
+    <main>
+
+      <!-- HERO -->
+      <section class="hero" aria-labelledby="h1">
+        <div class="ctr">
+          <div class="badge" aria-hidden="true">
+            <span class="badge-dot"></span>
+            No AI · No Logic · Just Excuses
+          </div>
+          <h1 id="h1">Need an <span class="hl">Excuse?</span></h1>
+          <p class="hero-sub">
+            Just tell us what happened. We'll come up with something weird.
+            It won't make sense. That's kind of the whole point.
+          </p>
+
+          <!-- INPUT -->
+          <div class="inp-section">
+            <div class="inp-wrap">
+              <label for="sit" class="sr">Describe your situation</label>
+              <textarea id="sit" class="sitch" placeholder="What happened? Tell us your situation..." maxlength="500"
+                rows="4" aria-describedby="err-msg char-cnt" oninput="onInput(this)"></textarea>
+              <span class="char-cnt" id="char-cnt" aria-live="polite">0 / 500</span>
+            </div>
+
+            <div class="err" id="err-msg" role="alert" aria-atomic="true">
+              <span aria-hidden="true">💬</span>
+              <span>Hold on — what's the situation? Type something up there first.</span>
+            </div>
+
+            <!-- Top action row -->
+            <div class="top-row">
+              <button id="gen-btn" class="btn-gen" onclick="generate()" aria-label="Generate a random excuse">
+                <span class="bt">Generate My Excuse 🎲</span>
+                <span class="bld" aria-live="polite">
+                  <span class="spin" role="status" aria-label="Loading"></span>
+                  Cooking up something totally unrelated...
+                </span>
+              </button>
+              <button class="btn-surprise" onclick="surpriseMe()" id="surprise-btn"
+                aria-label="Pick a random situation and generate an excuse for me">
+                ✨ Surprise Me
+              </button>
+            </div>
+          </div>
+
+          <!-- RESULT CARD -->
+          <div class="result" id="result" aria-live="polite" aria-atomic="true">
+            <div class="rcard" role="region" aria-label="Your excuse">
+              <div class="rcard-label" aria-hidden="true">✦ Here's your excuse</div>
+              <div class="rcard-quote">
+                <div class="rcard-text" id="r-text"></div>
+              </div>
+              <div id="r-cred" class="cred" aria-label="Credibility level"></div>
+              <div class="ract">
+                <button class="btn btn-p" id="btn-again" onclick="again()" aria-label="Generate another excuse">
+                  🎲 Try Another One
+                </button>
+                <button class="btn btn-s btn-cp" id="btn-cp" onclick="copyOne()" aria-label="Copy excuse to clipboard">
+                  📋 Copy It
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- STATS -->
+      <section class="sec" aria-labelledby="stats-h">
+        <div class="ctr">
+          <h2 class="sec-title" id="stats-h">📊 How's It Going</h2>
+          <div class="sgrid" role="list">
+            <div class="scard" role="listitem">
+              <div class="sv" id="s-gen">0</div>
+              <div class="sl">Excuses Made</div>
+            </div>
+            <div class="scard" role="listitem">
+              <div class="sv" id="s-logic">100%</div>
+              <div class="sl">Logic Left</div>
+            </div>
+            <div class="scard" role="listitem">
+              <div class="sv" id="s-sense">100%</div>
+              <div class="sl">Common Sense Left</div>
+            </div>
+            <div class="scard" role="listitem">
+              <div class="sv" id="s-chaos">0%</div>
+              <div class="sl">Chaos So Far</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- HISTORY -->
+      <section class="sec" aria-labelledby="hist-h">
+        <div class="ctr">
+          <div class="hist-hdr">
+            <h2 class="sec-title" id="hist-h" style="margin-bottom:0">🕰️ Past Excuses</h2>
+            <button class="btn-clr" onclick="clearHistory()" aria-label="Clear all excuse history">🗑 Clear All</button>
+          </div>
+          <div id="hist-zone" aria-live="polite">
+            <div class="hist-empty" id="hist-empty">
+              <div class="he-ico" aria-hidden="true">📭</div>
+              <p>Nothing here yet. Make an excuse and it'll show up.</p>
+            </div>
+            <ol class="hlist" id="hlist" aria-label="Excuse history" reversed></ol>
+          </div>
+          <!-- Copy All bar -->
+          <div class="copy-all-bar" id="copy-all-bar">
+            <button class="btn btn-s btn-ca" id="btn-ca" onclick="copyAll()" aria-label="Copy all excuses to clipboard">
+              📋 Copy All
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ABOUT -->
+      <section id="about" aria-labelledby="about-h">
+        <div class="ctr">
+          <div class="acard">
+            <h2 id="about-h">So What Is This, Exactly?</h2>
+            <p>
+              <strong>RANDOM EXCUSE ROULETTE</strong> is a tool nobody really asked for.
+              You type in your situation, and it gives you a completely unrelated excuse.
+              That's it. That's all it does.
+            </p>
+            <p>
+              It doesn't use AI. It doesn't use logic. It just picks something random and
+              throws it at you. We think that's enough. Honestly, maybe more than enough.
+            </p>
+            <div class="aquote" role="blockquote">
+              "Sometimes the best answer is one that has nothing to do with the question."
+              — <em>Someone, probably</em>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <footer role="contentinfo">
+      <p>🎲 <strong>Random Excuse Roulette</strong> — Just keep clicking until something sticks.<br>No logic. No
+        regrets. Absolutely no guarantees.</p>
+      <p style="margin-top:7px;font-size:.74rem;opacity:.45">No excuses were harmed. Some were slightly embarrassed.</p>
+    </footer>
+  </div><!-- /.wrap -->
+
+  <!-- ====== JAVASCRIPT ====== -->
+  <script>
+    /* ================================================================
+       EXCUSE DATABASE
+    ================================================================ */
+    const FIXED = [
+      "A dinosaur ate my homework.",
+      "My dog learned how to fly and I had to watch.",
+      "An alien borrowed my shoes.",
+      "A pirate stole my sandwich.",
+      "My bed turned into a spaceship.",
+      "A monkey threw a banana at my head.",
+      "I was chased by a very angry chicken.",
+      "My socks ran away.",
+      "A magic frog turned my alarm clock into a potato.",
+      "I fell into a big pile of jelly.",
+      "My goldfish told me a really long story.",
+      "A superhero needed my help to save a cat.",
+      "My shadow started running away from me.",
+      "A dragon sneezed on my shirt.",
+      "I got stuck in a giant bubble.",
+      "A bear gave me a big hug and wouldn't let go.",
+      "My backpack turned into a monster.",
+      "I was busy teaching my cat how to read.",
+      "A wizard froze me for five minutes.",
+      "My shoes were tied together by a sneaky fairy.",
+      "I found a treasure map and had to follow it.",
+      "A ghost stole my toothbrush.",
+      "I was talking to a tree.",
+      "My cereal bowl started floating.",
+      "A ninja hid my keys.",
+      "I had to help a turtle cross the road.",
+      "My TV started talking to me.",
+      "A robot asked me for directions.",
+      "I was stuck in a sticky spider web.",
+      "My pet rock ran away.",
+      "A silly clown blocked my door.",
+      "I got lost in my own closet.",
+      "My blanket wouldn't let me get up.",
+      "A flying saucer landed in my yard.",
+      "I was busy catching butterflies.",
+      "My hair grew super fast and covered my eyes.",
+      "A friendly zombie wanted to play tag.",
+      "I had to stop a runaway pumpkin.",
+      "My mirror showed a funny face and I couldn't stop laughing.",
+      "A little bird told me a secret.",
+      "I accidentally glued my hands together.",
+      "A giant baby sat on my car.",
+      "My pants walked away by themselves.",
+      "I found a magic wand and turned myself into a bug.",
+      "A squirrel challenged me to a race.",
+      "My house floated away like a balloon.",
+      "I was busy counting the stars.",
+      "A loud cow kept mooing at me.",
+      "My toy car turned into a real car.",
+      "I had to build a fort out of pillows.",
+      "A funny monster made silly faces at me.",
+      "I was stuck inside a giant snowball.",
+      "My dog ate my alarm clock.",
+      "A flying carpet took me for a ride.",
+      "I had to catch a falling star.",
+      "My spoon ran away with the dish.",
+      "A grumpy troll wouldn't let me cross the bridge.",
+      "I got tangled in a pile of spaghetti.",
+      "A little green man asked me for a snack.",
+      "My fridge started making ice cream everywhere.",
+      "I was busy digging for gold in the sandbox.",
+      "A talking dog told me a joke.",
+      "My hat flew away and I had to chase it.",
+      "I had to stop an army of ants from eating my lunch.",
+      "A big scary bug landed on my nose.",
+      "My bike turned into a horse.",
+      "I was busy hiding from a tickle monster.",
+      "A silly goose chased me around the yard.",
+      "My shoes turned into roller skates.",
+      "I had to help a lost duckling find its mom.",
+      "A giant cloud shaped like a puppy distracted me.",
+      "My toothbrush started dancing.",
+      "I was busy blowing a giant bubblegum bubble.",
+      "A funny robot did a silly dance for me.",
+      "My bed was too soft and I couldn't get out.",
+      "I had to chase a runaway balloon.",
+      "A magic genie granted me a wish.",
+      "My pillow started talking to me.",
+      "I was busy watching a snail race.",
+      "A loud parrot kept repeating everything I said.",
+      "My cat turned into a tiger.",
+      "I had to stop a flying pizza.",
+      "A friendly ghost played hide and seek with me.",
+      "My toy box exploded with toys.",
+      "I was busy building a giant sandcastle.",
+      "A silly monkey stole my hat.",
+      "My dog started speaking English.",
+      "I had to catch a runaway train.",
+      "A giant gummy bear gave me a hug.",
+      "My cereal turned into little bugs.",
+      "I was busy painting a masterpiece.",
+      "A funny clown made me a balloon animal.",
+      "My shoes were too bouncy.",
+      "I had to help a lost puppy.",
+      "A magic wand turned my room into a jungle.",
+      "My toy robot started cleaning my room.",
+      "I was busy hunting for dinosaur bones.",
+      "A silly alien wanted to play a game.",
+      "My bed turned into a trampoline.",
+      "I had to stop a runaway wheelbarrow.",
+      "A friendly dragon offered me a ride.",
+      "My cat brought me a giant mouse.",
+      "I was busy making a secret potion.",
+      "A loud monkey was swinging in my room.",
+      "My shoes were full of sand.",
+      "I had to catch a falling leaf.",
+      "A silly robot made me a sandwich.",
+      "My toy dinosaur started roaring.",
+      "I was busy catching fireflies.",
+      "A funny monster was hiding under my bed.",
+    ];
+
+    const SUBS = [
+      "A monkey", "My pet rock", "A loud frog", "A sleepy bear", "A ninja",
+      "A robot", "A big scary bug", "A friendly ghost", "A hungry dinosaur",
+      "My silly dog", "A flying pig", "A giant spider", "A sneaky cat",
+      "A grumpy troll", "A happy alien", "My magic shoes", "A bouncy ball",
+      "A talking tree", "A fuzzy caterpillar", "A tiny mouse", "A super hero",
+      "A silly clown", "A flying saucer", "A space alien", "A baby dragon",
+      "A little green man", "A giant potato", "A flying pizza", "A tickle monster",
+      "A runaway balloon", "A silly goose", "A noisy parrot", "A magic genie",
+      "A friendly zombie", "A big scary monster", "A tiny little bug",
+    ];
+
+    const ACTS = [
+      "started dancing", "ate all the cookies", "fell asleep on my head",
+      "jumped out the window", "started singing loudly", "ran away with my socks",
+      "made a funny face", "started crying", "gave me a big hug",
+      "wanted to play tag", "started glowing", "turned invisible",
+      "started flying around", "started doing jumping jacks", "started talking backwards",
+      "turned into a potato", "started hiccuping loudly", "started burping",
+      "wanted to play hide and seek", "started chasing me", "stole my hat",
+      "started eating my homework", "started jumping on the bed", "started spinning around",
+      "started making funny noises", "started blowing bubbles", "wanted to race",
+      "started doing magic tricks", "started painting the walls", "started playing video games",
+    ];
+
+    const SUFS = [
+      "so I had to hide.", "and it was very funny.", "so I ran away.",
+      "and I got scared.", "so I couldn't move.", "and I laughed so hard.",
+      "so I had to help.", "and it made me sneeze.", "so I started crying too.",
+      "and I fell down.", "so I had to jump really high.", "and it tickled me.",
+      "so I had to sing a song.", "and it was very loud.", "so I had to cover my ears.",
+      "and it smelled funny.", "so I had to hold my nose.", "and it was super sticky.",
+      "so I got stuck.", "and it was very slimy.", "so I had to wash my hands.",
+      "and it was very bright.", "so I had to close my eyes.", "and it was very bouncy.",
+      "so I bounced away.", "and it was very sleepy.", "so I took a nap.",
+    ];
+
+    // Surprise Me situations
+    const SITUATIONS = [
+      "Why am I late for school?",
+      "Why didn't I finish my homework?",
+      "Why didn't I reply to my friend?",
+      "Why is my room a mess?",
+      "Why did I miss the meeting?",
+      "Why didn't I do the dishes?",
+      "Why am I tired all the time?",
+      "Why didn't I exercise today?",
+      "Why is my project not done?",
+      "Why did I forget my wallet?",
+      "Why haven't I called my parents?",
+      "Why is my phone dead?",
+      "Why didn't I sleep on time?",
+      "Why haven't I replied to emails?",
+      "Why is the report still not finished?",
+      "Why did I miss the deadline?",
+      "Why didn't I water the plants?",
+      "Why am I always distracted?",
+      "Why didn't I go to the gym?",
+      "Why haven't I started studying?",
+    ];
+
+    const CREDS = [
+      { label: "🟢 Slightly Suspicious", cls: "c0" },
+      { label: "🟡 Questionably Believable", cls: "c1" },
+      { label: "🟠 Completely Ridiculous", cls: "c2" },
+      { label: "🔴 Absolutely Nonsensical", cls: "c3" },
+      { label: "💀 Beyond Explanation", cls: "c4" },
+    ];
+
+    /* ================================================================
+       STATE
+    ================================================================ */
+    const S = {
+      n: 0, hist: [], cur: '', recent: []
+    };
+
+    /* ================================================================
+       THEME
+    ================================================================ */
+    function applyTheme(t) {
+      document.documentElement.setAttribute('data-theme', t);
+      document.getElementById('theme-ico').textContent = t === 'dark' ? '☀️' : '🌙';
+      localStorage.setItem('rer-theme', t);
+    }
+    function toggleTheme() {
+      applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+    }
+    applyTheme(localStorage.getItem('rer-theme') || 'dark');
+
+    /* ================================================================
+       INPUT
+    ================================================================ */
+    function onInput(el) {
+      const c = document.getElementById('char-cnt');
+      c.textContent = el.value.length + ' / 500';
+      c.style.color = el.value.length > 400 ? '#fb923c' : '';
+    }
+
+    /* ================================================================
+       EXCUSE ENGINE
+    ================================================================ */
+    function dyn() {
+      const s = SUBS[Math.floor(Math.random() * SUBS.length)];
+      const a = ACTS[Math.floor(Math.random() * ACTS.length)];
+      const f = SUFS[Math.floor(Math.random() * SUFS.length)];
+      return `${s} ${a}, ${f}`;
+    }
+
+    function pick() {
+      let ex, tries = 0;
+      do {
+        ex = Math.random() > .5 ? dyn() : FIXED[Math.floor(Math.random() * FIXED.length)];
+        tries++;
+      } while (S.recent.includes(ex) && tries < 16);
+      S.recent.push(ex);
+      if (S.recent.length > 10) S.recent.shift();
+      return ex;
+    }
+
+    /* ================================================================
+       GENERATE
+    ================================================================ */
+    function generate() {
+      const sit = document.getElementById('sit').value.trim();
+      const err = document.getElementById('err-msg');
+      if (!sit) {
+        err.classList.add('on');
+        document.getElementById('sit').focus();
+        document.getElementById('sit').style.borderColor = 'rgba(239,68,68,.55)';
+        setTimeout(() => {
+          err.classList.remove('on');
+          document.getElementById('sit').style.borderColor = '';
+        }, 3400);
+        return;
+      }
+      err.classList.remove('on');
+      runGenerate();
+    }
+
+    function runGenerate() {
+      const btn = document.getElementById('gen-btn');
+      btn.classList.add('loading');
+      btn.disabled = true;
+
+      setTimeout(() => {
+        const ex = pick();
+        S.cur = ex; S.n++;
+        showResult(ex);
+        updateStats();
+        addHistory(ex);
+        btn.classList.remove('loading');
+        btn.disabled = false;
+      }, 850 + Math.random() * 400);
+    }
+
+    function again() {
+      const ex = pick();
+      S.cur = ex; S.n++;
+      showResult(ex);
+      updateStats();
+      addHistory(ex);
+    }
+
+    function surpriseMe() {
+      const sit = SITUATIONS[Math.floor(Math.random() * SITUATIONS.length)];
+      const ta = document.getElementById('sit');
+      ta.value = sit;
+      onInput(ta);
+      // Trigger with a small visual pulse on the textarea
+      ta.style.borderColor = 'rgba(6,182,212,.7)';
+      ta.style.boxShadow = '0 0 0 4px rgba(6,182,212,.18)';
+      setTimeout(() => { ta.style.borderColor = ''; ta.style.boxShadow = ''; }, 700);
+      // auto-generate
+      const btn = document.getElementById('gen-btn');
+      btn.classList.add('loading');
+      btn.disabled = true;
+      setTimeout(() => {
+        const ex = pick();
+        S.cur = ex; S.n++;
+        showResult(ex);
+        updateStats();
+        addHistory(ex);
+        btn.classList.remove('loading');
+        btn.disabled = false;
+      }, 950 + Math.random() * 350);
+    }
+
+    /* ================================================================
+       SHOW RESULT
+    ================================================================ */
+    function showResult(ex) {
+      const sec = document.getElementById('result');
+      const txt = document.getElementById('r-text');
+      const cred = document.getElementById('r-cred');
+
+      sec.classList.remove('on');
+      void sec.offsetWidth;
+      txt.textContent = `"${ex}"`;
+      const c = CREDS[Math.floor(Math.random() * CREDS.length)];
+      cred.className = `cred ${c.cls}`;
+      cred.textContent = c.label;
+      sec.classList.add('on');
+
+      // reset copy btn
+      const cp = document.getElementById('btn-cp');
+      cp.innerHTML = '📋 Copy Excuse';
+      cp.classList.remove('ok');
+
+      setTimeout(() => sec.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 80);
+    }
+
+    /* ================================================================
+       STATS
+    ================================================================ */
+    function updateStats() {
+      const n = S.n;
+      bump('s-gen', n);
+      bump('s-logic', Math.max(0, 100 - n * 7) + '%');
+      bump('s-sense', Math.max(0, 100 - n * 9) + '%');
+      bump('s-chaos', Math.min(100, n * 11) + '%');
+    }
+    function bump(id, val) {
+      const el = document.getElementById(id);
+      el.textContent = val;
+      el.classList.remove('bump');
+      void el.offsetWidth;
+      el.classList.add('bump');
+      setTimeout(() => el.classList.remove('bump'), 400);
+    }
+
+    /* ================================================================
+       HISTORY
+    ================================================================ */
+    function addHistory(ex) {
+      S.hist.unshift(ex);
+      document.getElementById('hist-empty').style.display = 'none';
+      document.getElementById('copy-all-bar').classList.add('on');
+
+      const list = document.getElementById('hlist');
+      const li = document.createElement('li');
+      li.className = 'hitem';
+
+      const num = document.createElement('span');
+      num.className = 'hn'; num.setAttribute('aria-hidden', 'true');
+      num.textContent = '#' + S.hist.length;
+
+      const t = document.createElement('span');
+      t.className = 'ht'; t.textContent = `"${ex}"`;
+
+      const cb = document.createElement('button');
+      cb.className = 'btn-cpsm';
+      cb.textContent = '📋';
+      cb.setAttribute('aria-label', 'Copy this excuse');
+      cb.onclick = () => cpItem(ex, cb);
+
+      li.append(num, t, cb);
+      list.insertBefore(li, list.firstChild);
+    }
+
+    function clearHistory() {
+      S.hist = [];
+      document.getElementById('hist-empty').style.display = '';
+      document.getElementById('hlist').innerHTML = '';
+      document.getElementById('copy-all-bar').classList.remove('on');
+      const ca = document.getElementById('btn-ca');
+      ca.innerHTML = '📋 Copy All Excuses';
+      ca.classList.remove('ok');
+    }
+
+    /* ================================================================
+       CLIPBOARD HELPERS
+    ================================================================ */
+    async function cp(text) { try { await navigator.clipboard.writeText(text); } catch { fallback(text); } }
+    function fallback(text) {
+      const ta = document.createElement('textarea');
+      ta.value = text; ta.style.cssText = 'position:fixed;opacity:0';
+      document.body.appendChild(ta); ta.select();
+      document.execCommand('copy'); document.body.removeChild(ta);
+    }
+
+    async function copyOne() {
+      const btn = document.getElementById('btn-cp');
+      await cp(S.cur);
+      btn.innerHTML = '✓ Copied!'; btn.classList.add('ok');
+      setTimeout(() => { btn.innerHTML = '📋 Copy Excuse'; btn.classList.remove('ok'); }, 2200);
+    }
+
+    async function copyAll() {
+      if (!S.hist.length) return;
+      const btn = document.getElementById('btn-ca');
+      const all = S.hist.map((e, i) => `${i + 1}. "${e}"`).join('\n');
+      await cp(all);
+      btn.innerHTML = '✓ All Copied!'; btn.classList.add('ok');
+      setTimeout(() => { btn.innerHTML = '📋 Copy All Excuses'; btn.classList.remove('ok'); }, 2500);
+    }
+
+    async function cpItem(text, btn) {
+      await cp(text);
+      btn.textContent = '✓'; btn.classList.add('ok');
+      setTimeout(() => { btn.textContent = '📋'; btn.classList.remove('ok'); }, 2000);
+    }
+
+    /* ================================================================
+       NAV
+    ================================================================ */
+    function goHome() { window.scrollTo({ top: 0, behavior: 'smooth' }); setNav('nl-home'); }
+    function goAbout() { document.getElementById('about').scrollIntoView({ behavior: 'smooth' }); setNav('nl-about'); }
+    function setNav(id) {
+      document.querySelectorAll('.nl').forEach(e => e.classList.remove('on'));
+      document.getElementById(id).classList.add('on');
+      document.getElementById(id).setAttribute('aria-current', 'page');
+    }
+
+    // Ctrl/Cmd+Enter to generate
+    document.getElementById('sit').addEventListener('keydown', e => {
+      if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) generate();
+    });
+
+    // Scroll-based nav highlight
+    window.addEventListener('scroll', () => {
+      const a = document.getElementById('about');
+      if (!a) return;
+      if (a.getBoundingClientRect().top <= 110) setNav('nl-about');
+      else setNav('nl-home');
+    });
+  </script>
+</body>
+
+</html>
