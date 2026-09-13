@@ -58,11 +58,6 @@ For Software:This project is a single-page application called "Random Excuse Rou
 ![Output Screen](outputscreen.png)
 *Add caption explaining what this shows*
 
-# Diagrams
-![Workflow](Add your workflow/architecture diagram here)
-*Add caption explaining your workflow*
-
-For Hardware:
 
 
 ## Team Contributions
